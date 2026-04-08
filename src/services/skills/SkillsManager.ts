@@ -14,6 +14,7 @@ import {
 	SKILL_NAME_MAX_LENGTH,
 } from "@roo-code/types"
 import { t } from "../../i18n"
+import { SkillDecryptor } from "./SkillDecryptor"
 
 // Re-export for convenience
 export type { SkillMetadata, SkillContent }
@@ -99,7 +100,8 @@ export class SkillsManager {
 		if (!(await fileExists(skillMdPath))) return
 
 		try {
-			const fileContent = await fs.readFile(skillMdPath, "utf-8")
+			// Use SkillDecryptor to read file (handles encrypted files automatically)
+			const fileContent = await SkillDecryptor.readSkillFile(skillMdPath, "utf-8")
 
 			// Use gray-matter to parse frontmatter
 			const { data: frontmatter, content: body } = matter(fileContent)
@@ -272,8 +274,8 @@ export class SkillsManager {
 
 		if (!skill) return null
 
-		// Read skill content from disk
-		const fileContent = await fs.readFile(skill.path, "utf-8")
+		// Read skill content from disk (handles encrypted files automatically)
+		const fileContent = await SkillDecryptor.readSkillFile(skill.path, "utf-8")
 		const { content: body } = matter(fileContent)
 
 		return {
@@ -538,8 +540,8 @@ Add your skill instructions here.
 			throw new Error(t("skills:errors.not_found", { name, source, modeInfo: "" }))
 		}
 
-		// Read the current SKILL.md file
-		const fileContent = await fs.readFile(skill.path, "utf-8")
+		// Read the current SKILL.md file (handles encrypted files automatically)
+		const fileContent = await SkillDecryptor.readSkillFile(skill.path, "utf-8")
 		const { data: frontmatter, content: body } = matter(fileContent)
 
 		// Update the frontmatter with new modeSlugs

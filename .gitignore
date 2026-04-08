@@ -1,57 +1,62 @@
-.pnpm-store
-dist
-out
-out-*
-node_modules
-package-lock.json
-coverage/
-mock/
+```
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+dist/
+build/
+target/
 
-.DS_Store
-
-# IDEs
-.idea
-
-# Builds
-bin/
-*.vsix
-
-# Local prompts and rules
-/local-prompts
-AGENTS.local.md
-
-# Test environment
-.test_env
-.vscode-test/
-
-# Docs
-docs/_site/
-
-# Dotenv
+# Dependencies
+node_modules/
+venv/
+.venv/
 .env
-.env.*
-!.env.*.sample
+.env.local
+*.env.*
 
-# Logging
-logs
+# Logs and temp files
 *.log
+*.tmp
+*.swp
 
-# Vite development
-.vite-port
-
-# Turborepo
-.turbo
-
-# IntelliJ and Qodo plugin folders
+# Editors
+.vscode/
 .idea/
-.qodo/
-.vercel
-.roo/mcp.json
+*.swp
+*.swo
 
-# Qdrant
-qdrant_storage/
+# Test coverage
+coverage/
+htmlcov/
+.coverage
 
-# Architect plans
-plans/
+# OS generated files
+.DS_Store
+Thumbs.db
 
-roo-cli-*.tar.gz*
+# Compression files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
+```
