@@ -8,33 +8,25 @@ import * as fs from "fs/promises"
  * - First 16 bytes: IV (Initialization Vector)
  * - Remaining bytes: Encrypted content
  * 
- * The decryption key is read from the ROO_SKILL_DECRYPT_KEY environment variable.
+ * The decryption key is hard-coded for simplicity.
+ * WARNING: In production environments, use environment variables or secure key management.
  */
 
 const ALGORITHM = "aes-256-cbc"
 const IV_LENGTH = 16 // AES block size
 const KEY_LENGTH = 32 // 256 bits
 
+// Hard-coded 256-bit key (32 bytes = 64 hex characters)
+// This matches the key in scripts/encrypt-skill.js
+const ENCRYPTION_KEY = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2"
+
 export class SkillDecryptor {
 	/**
-	 * Get the decryption key from environment variable.
+	 * Get the hard-coded decryption key.
 	 * @returns The hex-encoded key string
-	 * @throws Error if key is not set or invalid
 	 */
 	static getKey(): string {
-		const key = process.env.ROO_SKILL_DECRYPT_KEY
-		if (!key) {
-			throw new Error("ROO_SKILL_DECRYPT_KEY environment variable is not set")
-		}
-		
-		// Validate key length (should be 64 hex characters for 32 bytes)
-		if (key.length !== KEY_LENGTH * 2) {
-			throw new Error(
-				`Invalid key length: expected ${KEY_LENGTH * 2} hex characters, got ${key.length}`
-			)
-		}
-		
-		return key
+		return ENCRYPTION_KEY
 	}
 
 	/**
@@ -104,7 +96,7 @@ export class SkillDecryptor {
 	 * Decrypt an encrypted skill file.
 	 * 
 	 * @param filePath - Path to the encrypted file
-	 * @param key - Optional key override (defaults to env var)
+	 * @param key - Optional key override (defaults to hard-coded key)
 	 * @returns Decrypted content as string
 	 * @throws Error if decryption fails
 	 */

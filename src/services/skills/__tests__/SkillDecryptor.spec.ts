@@ -6,12 +6,15 @@ import { SkillDecryptor } from "../SkillDecryptor"
 const ALGORITHM = "aes-256-cbc"
 const IV_LENGTH = 16
 
+// Hard-coded key matching the one in SkillDecryptor.ts
+const HARD_CODED_KEY = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2"
+
 describe("SkillDecryptor", () => {
-	const testKey = crypto.randomBytes(32).toString("hex")
 	const originalEnv = process.env.ROO_SKILL_DECRYPT_KEY
 
 	beforeEach(() => {
-		process.env.ROO_SKILL_DECRYPT_KEY = testKey
+		// Clean up any env vars since we're using hard-coded key now
+		delete process.env.ROO_SKILL_DECRYPT_KEY
 	})
 
 	afterEach(() => {
@@ -23,19 +26,15 @@ describe("SkillDecryptor", () => {
 	})
 
 	describe("getKey", () => {
-		it("should return the key from environment variable", () => {
+		it("should return the hard-coded key", () => {
 			const key = SkillDecryptor.getKey()
-			expect(key).toBe(testKey)
+			expect(key).toBe(HARD_CODED_KEY)
 		})
 
-		it("should throw error if key is not set", () => {
-			delete process.env.ROO_SKILL_DECRYPT_KEY
-			expect(() => SkillDecryptor.getKey()).toThrow("ROO_SKILL_DECRYPT_KEY environment variable is not set")
-		})
-
-		it("should throw error if key has invalid length", () => {
-			process.env.ROO_SKILL_DECRYPT_KEY = "invalid"
-			expect(() => SkillDecryptor.getKey()).toThrow("Invalid key length")
+		it("should always return the same key", () => {
+			const key1 = SkillDecryptor.getKey()
+			const key2 = SkillDecryptor.getKey()
+			expect(key1).toBe(key2)
 		})
 	})
 
@@ -92,17 +91,17 @@ description: A test skill
 This is the content.
 `
 
-			// Encrypt the content
+			// Encrypt the content using hard-coded key
 			const iv = crypto.randomBytes(IV_LENGTH)
-			const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(testKey, "hex"), iv)
+			const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(HARD_CODED_KEY, "hex"), iv)
 			let encrypted = cipher.update(originalContent, "utf-8")
 			encrypted = Buffer.concat([encrypted, cipher.final()])
 			const encryptedBuffer = Buffer.concat([iv, encrypted])
 
 			await fs.writeFile(tempFile, encryptedBuffer)
 
-			// Decrypt and verify
-			const decrypted = await SkillDecryptor.decrypt(tempFile, testKey)
+			// Decrypt and verify (using default hard-coded key)
+			const decrypted = await SkillDecryptor.decrypt(tempFile)
 			await fs.rm(tempDir, { recursive: true, force: true })
 
 			expect(decrypted).toBe(originalContent)
@@ -115,7 +114,7 @@ This is the content.
 			// Write less than IV_LENGTH bytes
 			await fs.writeFile(tempFile, Buffer.from("small"))
 
-			await expect(SkillDecryptor.decrypt(tempFile, testKey)).rejects.toThrow(
+			await expect(SkillDecryptor.decrypt(tempFile)).rejects.toThrow(
 				"Encrypted file is too small"
 			)
 			await fs.rm(tempDir, { recursive: true, force: true })
@@ -155,9 +154,9 @@ description: A test skill
 Encrypted content.
 `
 
-			// Encrypt the content
+			// Encrypt the content using hard-coded key
 			const iv = crypto.randomBytes(IV_LENGTH)
-			const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(testKey, "hex"), iv)
+			const cipher = crypto.createCipheriv(ALGORITHM, Buffer.from(HARD_CODED_KEY, "hex"), iv)
 			let encrypted = cipher.update(originalContent, "utf-8")
 			encrypted = Buffer.concat([encrypted, cipher.final()])
 			const encryptedBuffer = Buffer.concat([iv, encrypted])
