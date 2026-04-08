@@ -7,7 +7,7 @@ const ALGORITHM = "aes-256-cbc"
 const IV_LENGTH = 16
 
 // Hard-coded key matching the one in SkillDecryptor.ts
-const HARD_CODED_KEY = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2"
+const HARD_CODED_KEY = "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90"
 
 describe("SkillDecryptor", () => {
 	const originalEnv = process.env.ROO_SKILL_DECRYPT_KEY

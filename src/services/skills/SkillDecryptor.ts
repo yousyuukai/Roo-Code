@@ -18,7 +18,7 @@ const KEY_LENGTH = 32 // 256 bits
 
 // Hard-coded 256-bit key (32 bytes = 64 hex characters)
 // This matches the key in scripts/encrypt-skill.js
-const ENCRYPTION_KEY = "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2"
+const ENCRYPTION_KEY = "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90"
 
 export class SkillDecryptor {
 	/**

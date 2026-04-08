@@ -19,7 +19,7 @@ const path = require('path');
 
 // 硬编码的 256 位密钥 (32 字节 = 64 个十六进制字符)
 // 在生产环境中应该使用环境变量或安全的密钥管理系统
-const ENCRYPTION_KEY = 'a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8c9d0e1f2';
+const ENCRYPTION_KEY = 'a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90';
 
 /**
  * 加密文件内容
