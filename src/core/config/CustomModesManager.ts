@@ -8,6 +8,7 @@ import stripBom from "strip-bom"
 
 import { type ModeConfig, type PromptComponent, customModesSettingsSchema, modeConfigSchema } from "@roo-code/types"
 
+import { PromptDecryptor } from "../services/skills/PromptDecryptor"
 import { fileExistsAtPath } from "../../utils/fs"
 import { getWorkspacePath } from "../../utils/path"
 import { getGlobalRooDirectory } from "../../services/roo-config"
@@ -182,7 +183,8 @@ export class CustomModesManager {
 
 	private async loadModesFromFile(filePath: string): Promise<ModeConfig[]> {
 		try {
-			const content = await fs.readFile(filePath, "utf-8")
+			// Use PromptDecryptor to read file (handles encrypted files automatically)
+			const content = await PromptDecryptor.readPromptFile(filePath, "utf-8")
 			const settings = this.parseYamlSafely(content, filePath)
 
 			// Ensure settings has customModes property
@@ -273,7 +275,8 @@ export class CustomModesManager {
 			try {
 				// Ensure that the settings file exists (especially important for delete events)
 				await this.getCustomModesFilePath()
-				const content = await fs.readFile(settingsPath, "utf-8")
+				// Use PromptDecryptor to read file (handles encrypted files automatically)
+				const content = await PromptDecryptor.readPromptFile(settingsPath, "utf-8")
 
 				const errorMessage = t("common:customModes.errors.invalidFormat")
 
@@ -466,7 +469,8 @@ export class CustomModesManager {
 		let content = "{}"
 
 		try {
-			content = await fs.readFile(filePath, "utf-8")
+			// Use PromptDecryptor to read file (handles encrypted files automatically)
+			content = await PromptDecryptor.readPromptFile(filePath, "utf-8")
 		} catch (error) {
 			// File might not exist yet.
 			content = yaml.stringify({ customModes: [] }, { lineWidth: 0 })
@@ -731,7 +735,8 @@ export class CustomModesManager {
 					try {
 						const roomodesExists = await fileExistsAtPath(roomodesPath)
 						if (roomodesExists) {
-							const roomodesContent = await fs.readFile(roomodesPath, "utf-8")
+							// Use PromptDecryptor to read file (handles encrypted files automatically)
+							const roomodesContent = await PromptDecryptor.readPromptFile(roomodesPath, "utf-8")
 							const roomodesData = yaml.parse(roomodesContent)
 							const roomodesModes = roomodesData?.customModes || []
 

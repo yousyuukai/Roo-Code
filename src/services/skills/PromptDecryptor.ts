@@ -2,7 +2,8 @@ import * as crypto from "crypto"
 import * as fs from "fs/promises"
 
 /**
- * SkillDecryptor - Handles AES-256-CBC decryption of encrypted skill files.
+ * PromptDecryptor - Handles AES-256-CBC decryption of encrypted prompt files.
+ * Supports both Skills (SKILL.md) and Modes (.roomodes, custom-modes.yaml) files.
  * 
  * Encryption format:
  * - First 16 bytes: IV (Initialization Vector)
@@ -17,10 +18,10 @@ const IV_LENGTH = 16 // AES block size
 const KEY_LENGTH = 32 // 256 bits
 
 // Hard-coded 256-bit key (32 bytes = 64 hex characters)
-// This matches the key in scripts/encrypt-skill.js
+// This matches the key in scripts/encrypt-prompt.js
 const ENCRYPTION_KEY = "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90"
 
-export class SkillDecryptor {
+export class PromptDecryptor {
 	/**
 	 * Get the hard-coded decryption key.
 	 * @returns The hex-encoded key string
@@ -35,7 +36,7 @@ export class SkillDecryptor {
 	 * or has a specific magic byte pattern.
 	 * 
 	 * For simplicity, we check if the file cannot be read as valid UTF-8 text
-	 * with frontmatter (---), which is required for all skill files.
+	 * with expected frontmatter or YAML structure.
 	 * 
 	 * @param filePath - Path to the file
 	 * @returns true if the file appears to be encrypted
@@ -47,17 +48,34 @@ export class SkillDecryptor {
 			// Try to read as UTF-8
 			const content = buffer.toString("utf-8")
 			
-			// Valid skill files should start with --- (frontmatter)
-			// If it doesn't look like valid frontmatter, it might be encrypted
-			if (!content.trim().startsWith("---")) {
-				return true
-			}
+			// Check based on file type
+			const isYamlFile = filePath.endsWith(".yaml") || filePath.endsWith(".yml") || filePath.endsWith(".roomodes")
+			const isMdFile = filePath.endsWith(".md")
 			
-			// Additional check: encrypted content often has non-printable characters
-			// If the content looks like binary data, it's likely encrypted
-			const printableRatio = this.getPrintableCharacterRatio(content)
-			if (printableRatio < 0.85) {
-				return true
+			if (isYamlFile || filePath.endsWith(".roomodes")) {
+				// YAML files should start with valid YAML content
+				// Encrypted files will have non-printable characters
+				const printableRatio = this.getPrintableCharacterRatio(content)
+				if (printableRatio < 0.85) {
+					return true
+				}
+				
+				// Check if it looks like valid YAML structure
+				// Encrypted content won't have proper YAML formatting
+				if (!content.includes(":") && !content.trim().startsWith("#")) {
+					return true
+				}
+			} else if (isMdFile) {
+				// Valid skill files should start with --- (frontmatter)
+				if (!content.trim().startsWith("---")) {
+					return true
+				}
+				
+				// Additional check: encrypted content often has non-printable characters
+				const printableRatio = this.getPrintableCharacterRatio(content)
+				if (printableRatio < 0.85) {
+					return true
+				}
 			}
 			
 			return false
@@ -93,7 +111,7 @@ export class SkillDecryptor {
 	}
 
 	/**
-	 * Decrypt an encrypted skill file.
+	 * Decrypt an encrypted prompt file.
 	 * 
 	 * @param filePath - Path to the encrypted file
 	 * @param key - Optional key override (defaults to hard-coded key)
@@ -127,19 +145,20 @@ export class SkillDecryptor {
 	}
 
 	/**
-	 * Read and optionally decrypt a skill file.
+	 * Read and optionally decrypt a prompt file.
 	 * If the file is encrypted, it will be decrypted automatically.
+	 * Supports both SKILL.md and .roomodes/custom-modes.yaml files.
 	 * 
-	 * @param filePath - Path to the skill file
+	 * @param filePath - Path to the prompt file
 	 * @param encoding - File encoding (default: utf-8)
 	 * @returns File content as string
 	 */
-	static async readSkillFile(filePath: string, encoding: BufferEncoding = "utf-8"): Promise<string> {
+	static async readPromptFile(filePath: string, encoding: BufferEncoding = "utf-8"): Promise<string> {
 		// Check if file is encrypted
 		const isEncrypted = await this.isEncrypted(filePath)
 		
 		if (isEncrypted) {
-			console.log(`[SkillDecryptor] Decrypting encrypted skill file: ${filePath}`)
+			console.log(`[PromptDecryptor] Decrypting encrypted prompt file: ${filePath}`)
 			return await this.decrypt(filePath)
 		}
 		
